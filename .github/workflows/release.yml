@@ -1,0 +1,142 @@
+name: Release Desktop Server
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: BeepBridge-windows.exe
+          - os: ubuntu-latest
+            artifact: BeepBridge-linux.deb
+          - os: macos-latest
+            artifact: BeepBridge-macos.dmg
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # ── Linux: install tkinter (not bundled) ───────────────────
+      - name: Install tkinter (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk
+
+      # ── Dependencies ───────────────────────────────────────────
+      - name: Install Python dependencies
+        run: pip install -r server/requirements.txt pyinstaller
+
+      # ── Windows: convert icon.png → icon.ico ───────────────────
+      - name: Convert icon to ICO (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -c "
+          from PIL import Image
+          img = Image.open('server/icon.png')
+          sizes = [(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)]
+          img.save('server/icon.ico', sizes=sizes)
+          print('Created server/icon.ico')
+          "
+
+      # ── macOS: convert icon.png → icon.icns ────────────────────
+      - name: Convert icon to ICNS (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p server/icon.iconset
+          for size in 16 32 64 128 256 512; do
+            sips -z $size $size server/icon.png --out server/icon.iconset/icon_${size}x${size}.png
+            double=$((size * 2))
+            sips -z $double $double server/icon.png --out server/icon.iconset/icon_${size}x${size}@2x.png
+          done
+          iconutil -c icns server/icon.iconset -o server/icon.icns
+          echo "Created server/icon.icns"
+
+      # ── PyInstaller build ──────────────────────────────────────
+      - name: Build with PyInstaller
+        working-directory: server
+        run: pyinstaller build.spec --workpath build --distpath dist
+
+      # ── Windows: rename executable ─────────────────────────────
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mv server/dist/BeepBridge.exe BeepBridge-windows.exe
+
+      # ── Linux: package as .deb ─────────────────────────────────
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p deb/DEBIAN deb/usr/bin
+          cp server/dist/BeepBridge deb/usr/bin/beepbridge
+          chmod 755 deb/usr/bin/beepbridge
+          cat > deb/DEBIAN/control << EOF
+          Package: beepbridge
+          Version: ${VERSION}
+          Architecture: amd64
+          Maintainer: Diego Cancela <mail@diegocancela.cc>
+          Description: BeepBridge server
+           Cross-platform desktop server that receives barcode scans over HTTP
+           and types them into the focused application.
+          EOF
+          dpkg-deb --build deb BeepBridge-linux.deb
+
+      # ── macOS: package as .dmg ─────────────────────────────────
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install create-dmg
+          create-dmg \
+            --volname "BeepBridge" \
+            --window-pos 200 120 \
+            --window-size 400 300 \
+            --icon-size 128 \
+            --app-drop-link 280 150 \
+            --icon "BeepBridge.app" 120 150 \
+            BeepBridge-macos.dmg \
+            server/dist/BeepBridge.app
+
+      # ── Upload artifact ────────────────────────────────────────
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "BeepBridge ${{ github.ref_name }}"
+          body: "Download the server for your platform below. The Android app is available on Google Play."
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/BeepBridge-windows.exe
+            artifacts/BeepBridge-linux.deb
+            artifacts/BeepBridge-macos.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
