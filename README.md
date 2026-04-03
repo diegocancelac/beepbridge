@@ -1,48 +1,97 @@
 # BeepBridge
 
-Cross-platform desktop server that receives barcode scans over HTTP and types them into the focused application.
+Turn your phone into a wireless barcode scanner for your desktop.
 
-## Quick start
+BeepBridge scans barcodes and QR codes with your phone camera and instantly types them into whatever application is focused on your computer — no drivers, no USB cables, just your local Wi-Fi network.
 
+![BeepBridge icon](icon.png)
+
+## How it works
+
+1. Run the BeepBridge server on your desktop
+2. Install the app on your Android phone
+3. Point your phone at any barcode — it appears typed in your focused app
+
+## Download
+
+### Desktop server
+
+| Platform | Download |
+|----------|----------|
+| Windows | [BeepBridge-windows.exe](https://github.com/diegocancelac/beepbridge/releases/latest) |
+| Linux | [BeepBridge-linux.deb](https://github.com/diegocancelac/beepbridge/releases/latest) |
+| macOS | [BeepBridge-macos.dmg](https://github.com/diegocancelac/beepbridge/releases/latest) |
+
+### Android app
+
+Available on Google Play *(coming soon)*
+
+## Server setup
+
+### Windows
+Run `BeepBridge-windows.exe`. The app icon will appear in your system tray.
+
+### Linux
+```bash
+sudo dpkg -i BeepBridge-linux.deb
+beepbridge
+```
+
+### macOS
+Open `BeepBridge-macos.dmg` and drag BeepBridge to your Applications folder.
+
+> **Note:** On macOS, BeepBridge requires accessibility permissions to type into other applications. Go to System Settings → Privacy & Security → Accessibility and enable BeepBridge.
+
+## App setup
+
+1. Open BeepBridge on your phone
+2. Tap the settings icon
+3. Enter your computer's local IP address: `http://192.168.x.x:8080`
+4. Tap **Test connection** to verify
+5. Start scanning
+
+**Finding your local IP:**
+- Windows: `ipconfig` → IPv4 Address
+- Linux: `hostname -I`
+- macOS: `ipconfig getifaddr en0`
+
+Or use the **Copy local IP** button in the server's settings window.
+
+## Configuration
+
+### Key sequence
+
+After typing the barcode, the server can press additional keys automatically. Edit this via the settings window or directly in `keys.json`:
+```json
+[
+  { "key": "tab" },
+  { "text": "1" },
+  { "key": "enter" }
+]
+```
+
+Available special keys: `enter`, `tab`, `space`, `backspace`, `delete`, `up`, `down`, `left`, `right`, `home`, `end`, `esc`, `f1`–`f12`
+
+### Port
+
+Default port is `8080`. Change it in the settings window — the server restarts automatically.
+
+## Building from source
+
+### Server
 ```bash
 cd server
 pip install -r requirements.txt
 python main.py
 ```
 
-The server starts on port **8080** by default. Change it from the settings window (right-click the tray icon → *Open settings*).
-
-## API
-
-### POST /scan
-
-```json
-{ "barcode": "1234567890" }
-```
-
-The server types the barcode value into the currently focused window, followed by the configured key sequence (default: Enter).
-
-### GET /health
-
-Returns `{ "status": "running" }`.
-
-## Building a standalone executable
-
+### App
 ```bash
-cd server
-pip install -r requirements.txt
-pyinstaller build.spec
+cd app
+flutter pub get
+flutter run
 ```
 
-The output goes to `server/dist/BeepBridge/`.
+## License
 
-## macOS note
-
-`pynput` requires accessibility permissions. Go to **System Settings → Privacy & Security → Accessibility** and grant permission to the terminal or the built app.
-
-## Configuration
-
-- **server/config.json** – server port
-- **server/keys.json** – key sequence sent after each barcode (array of `{"key": "..."}` or `{"text": "..."}` entries)
-
-Both files are created with defaults on first run if they don't exist.
+MIT
