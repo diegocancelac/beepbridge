@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeepBridge — Your phone. Your barcode scanner.</title>
+    <meta name="description" content="Scan any barcode or QR code with your phone and instantly type it into any app on your desktop. No drivers. No cables.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0e0e0e;
+            --bg-raised: #161616;
+            --bg-card: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #e8e8e8;
+            --text-muted: #888;
+            --accent: #C0392B;
+            --accent-hover: #d94435;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--accent-hover);
+        }
+
+        /* Hero */
+
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-icon {
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-family: var(--mono);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            max-width: 560px;
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: 0.875rem;
+            font-weight: 700;
+            padding: 0.85rem 1.75rem;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            border-color: var(--text);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: #fff;
+        }
+
+        /* Sections */
+
+        section {
+            padding: 5rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: var(--mono);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        /* How it works */
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            border: 1px solid var(--border);
+            background: var(--bg-raised);
+        }
+
+        .step-number {
+            font-family: var(--mono);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .step h3 {
+            font-family: var(--mono);
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Downloads */
+
+        .downloads {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .download-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border: 1px solid var(--border);
+            background: var(--bg-raised);
+            transition: border-color 0.15s ease;
+        }
+
+        .download-card:hover {
+            border-color: var(--text-muted);
+        }
+
+        .download-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .download-platform {
+            font-family: var(--mono);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .download-file {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: var(--mono);
+        }
+
+        .download-arrow {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            transition: color 0.15s ease;
+        }
+
+        .download-card:hover .download-arrow {
+            color: var(--accent);
+        }
+
+        /* Footer */
+
+        footer {
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer span {
+            margin: 0 0.75rem;
+        }
+
+        footer a {
+            color: var(--text-muted);
+        }
+
+        footer a:hover {
+            color: var(--text);
+        }
+
+        /* Responsive */
+
+        @media (max-width: 700px) {
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .downloads {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-icon">
+            <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="8" y="16" width="4" height="40" rx="1" fill="#C0392B"/>
+                <rect x="16" y="16" width="2" height="40" rx="1" fill="#C0392B"/>
+                <rect x="22" y="16" width="6" height="40" rx="1" fill="#C0392B"/>
+                <rect x="32" y="16" width="2" height="40" rx="1" fill="#C0392B"/>
+                <rect x="38" y="16" width="4" height="40" rx="1" fill="#C0392B"/>
+                <rect x="46" y="16" width="2" height="40" rx="1" fill="#C0392B"/>
+                <rect x="52" y="16" width="6" height="40" rx="1" fill="#C0392B"/>
+                <rect x="62" y="16" width="2" height="40" rx="1" fill="#C0392B"/>
+                <rect x="4" y="12" width="64" height="2" rx="1" fill="#C0392B" opacity="0.4"/>
+                <rect x="4" y="58" width="64" height="2" rx="1" fill="#C0392B" opacity="0.4"/>
+            </svg>
+        </div>
+        <h1>Your phone. Your barcode scanner.</h1>
+        <p>Scan any barcode or QR code with your phone and instantly type it into any app on your desktop. No drivers. No cables.</p>
+        <div class="cta-row">
+            <a href="#" class="btn btn-primary">Download for Windows</a>
+            <a href="#" class="btn">Get it on Google Play</a>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section>
+        <div class="container">
+            <h2 class="section-title">How it works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Run the server</h3>
+                    <p>Start BeepBridge on your desktop. It listens for scans on your local network.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Connect the app</h3>
+                    <p>Open the Android app and enter your computer's local IP address.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Scan — it types</h3>
+                    <p>Point your phone at any barcode. The value appears on your desktop, typed automatically.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download -->
+    <section>
+        <div class="container">
+            <h2 class="section-title">Download</h2>
+            <div class="downloads">
+                <a href="https://github.com/diegocancelac/beepbridge/releases/latest" class="download-card">
+                    <div class="download-info">
+                        <span class="download-platform">Windows</span>
+                        <span class="download-file">BeepBridge-windows.exe</span>
+                    </div>
+                    <span class="download-arrow">&darr;</span>
+                </a>
+                <a href="https://github.com/diegocancelac/beepbridge/releases/latest" class="download-card">
+                    <div class="download-info">
+                        <span class="download-platform">Linux</span>
+                        <span class="download-file">BeepBridge-linux.deb</span>
+                    </div>
+                    <span class="download-arrow">&darr;</span>
+                </a>
+                <a href="https://github.com/diegocancelac/beepbridge/releases/latest" class="download-card">
+                    <div class="download-info">
+                        <span class="download-platform">macOS</span>
+                        <span class="download-file">BeepBridge-macos.dmg</span>
+                    </div>
+                    <span class="download-arrow">&darr;</span>
+                </a>
+                <a href="#" class="download-card">
+                    <div class="download-info">
+                        <span class="download-platform">Android</span>
+                        <span class="download-file">Google Play</span>
+                    </div>
+                    <span class="download-arrow">&rarr;</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2026 Diego Cancela
+        <span>&middot;</span>
+        <a href="privacy.html">Privacy Policy</a>
+        <span>&middot;</span>
+        <a href="https://github.com/diegocancelac/beepbridge">GitHub</a>
+    </footer>
+
+</body>
+</html>

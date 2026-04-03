@@ -25,3 +25,6 @@ server/work/
 .DS_Store
 Thumbs.db
 *.log
+
+landing/docker-compose.yml
+landing/Dockerfile
